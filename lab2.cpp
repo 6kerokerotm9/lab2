@@ -7,22 +7,20 @@ struct proposition {
   std::string name;
 };
 
-struct operations { //holds the type of operation and the propositions involved in the operation
-  propositions prop1;
-  std::string operation;
-  poropositions prop2;
-
+void print(bool);
 bool negation(bool);
 bool conjunction(bool, bool);
 bool disjunction(bool, bool);
 bool exclusiveor(bool, bool);
 bool implies(bool, bool);
 bool biconditional(bool, bool);
-void print(bool);
-void input(std::string[], int);
+void input(std::string[], std::string[], int);
 void fill(proposition[], std::string);
-bool check(std::string);
+void sort(std::string[], std::string[], std::string[], int);
+void impliesorder(std::string[], std::string[]);
+bool result(std::string[], std::string[], proposition[], int);
 int numcheck(int*);
+bool check(std::string);
 std::string lowercase(std::string);
 
 int main() {
@@ -31,10 +29,21 @@ int main() {
   std::string name;
   proposition props[psize]; //list to hold the propositions in which the user chooses the amount
   std::string choices[csize]; //list that holds the the operations that the user chooses
+  std::string sortedchoices[csize]; //sorted version of choices by order of operations
   std::cout << "Hi, please enter your name: ";
   std::getline(std::cin, name);
   fill(props, name);
-  input(choices, csize);
+  input(choices, sortedchoices, csize);
+  result(choices, sortedchoices, props, csize);
+}
+
+void print(bool value) { //used to print out the string values true and false from bool values
+  if(value == true) {
+    std::cout << "true" << std::endl; //changes the 1 and 0 boolean values to string values
+  }
+  if(value == false) {
+    std::cout << "false" << std::endl;  
+  } 
 }
 
 bool negation(bool value) { //basic negation function 
@@ -76,16 +85,7 @@ bool biconditional(bool value1, bool value2) {
   return false; //otherwise return false
 }
 
-void print(bool value) { //used to print out the string values true and false from bool values
-  if(value == true) {
-    std::cout << std::setw(20) << std::left << "true"; //changes the 1 and 0 boolean values to string values
-  }
-  if(value == false) {
-    std::cout << std::setw(20) << std::left << "false";  
-  }
-}
-
-void input(std::string choices[], int csize) { //function that takes user input 
+void input(std::string choices[], std::string sortedchoices[], int csize) { //function that takes user input 
   std::string temp; //temporary string to hold the user input
   std::string userinput;
   int size = 0; //counter that keeps track of how many operations the user has chosen
@@ -98,6 +98,41 @@ void input(std::string choices[], int csize) { //function that takes user input
       break;
     }
     size++;
+  }
+  sort(choices, options, sortedchoices, size);
+}
+
+void sort(std::string choices[], std::string options[], std::string sortedchoices[], int size) { //function that sorts the array by the order of boolean operations
+  std::string temp[size];
+  int count = 0; //variable that keeps track of the temporary arrays index
+  for(int i=1; i<6; i++) { //starts at one so program checks for conjunction first in the list of options
+    for(int j=0; j<size; j++) {  
+      if(choices[j] == options[i]) { //if the operation is found in the choices list
+        if(j == 1 && count > 0) { //if the operation is found in the start of the list, uses count to check if the sorted list is empty
+          temp[count] = choices[j];
+          count++;
+          temp[count] = choices[j-1];
+          count++;
+        }
+        else if(count == 0) { //if temp is empty then fill the array with the first group of operations
+          temp[count] = choices[j-1];
+          count++;
+          temp[count] = choices[j];
+          count++;
+          temp[count] = choices[j+1];
+          count++;
+        }
+        else { //if the operation is found but it is not the first operation or group of operations found
+          temp[count] = choices[j];
+          count++;
+          temp[count] = choices[j+1];
+          count++;
+        }  
+      }
+    }
+  }
+  for(int i=0; i<size; i++) {
+    sortedchoices[i] = temp[i];
   }
 }
 
@@ -137,6 +172,64 @@ bool check(std::string temp) { //data validation as well as turning the user inp
   }
 }
 
+bool result(std::string choices[], std::string sortedchoices[], proposition props[], int csize) {
+  bool temp; //boolean value that holds the values of the operations as the program goes through the array
+  proposition prop1; //three temporary variables that hold the two propositions and the operation between them
+  proposition prop2;
+  std::string operation; 
+  for(int i=0; i<csize; i=1+3) {
+    if(sortedchoices[i] == "") {
+      break;
+    }
+    else if(i == 0) {
+      for(int j=0; j<4; j++) {
+        if(props[j].name == "") {
+          break;
+        } 
+        if(sortedchoices[i] == props[j].name) {
+           prop1 = props[j]; 
+        } 
+        else if(sortedchoices[i] == ("~" + props[j].name)) {
+           prop1 = props[j];
+           prop1.value = negation(prop1.value); 
+        } 
+      }
+    }
+    else {
+      prop1.value = temp;  
+    }
+    for(int k=0; k<4; k++) {
+      if(props[k].name == "") {
+        break;
+      }
+      if(sortedchoices[i+2] == props[k].name) {
+         prop2 = props[k]; 
+      } 
+      else if(sortedchoices[i+2] == ("~" + props[k].name)) {
+         prop2 = props[k];
+         prop2.value = negation(prop2.value);  
+      } 
+    }
+    operation = sortedchoices[i+1];
+    if(operation == "^") {
+      temp = conjunction(prop1.value, prop2.value);
+    }
+    else if(operation == "v") {
+      temp = disjunction(prop1.value, prop2.value);
+    }
+    else if(operation == "xor") {
+      temp = exclusiveor(prop1.value, prop2.value);
+    }
+    else if(operation == "->") {
+      temp = implies(prop1.value, prop2.value);
+    }
+    else if(operation == "<->") {
+      temp = biconditional(prop1.value, prop2.value);
+    }
+  }  
+  print(temp);
+}
+
 int numcheck(int * amount) { //some data validation for integers
   bool flag = false;
   while(flag == false) { 
@@ -149,7 +242,6 @@ int numcheck(int * amount) { //some data validation for integers
       flag = true;
     }
   } 
-
 }
 
 std::string lowercase(std::string temp) {
