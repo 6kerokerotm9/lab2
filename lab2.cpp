@@ -17,7 +17,7 @@ bool biconditional(bool, bool);
 void input(std::string[], std::string[], int);
 void fill(proposition[], std::string);
 void sort(std::string[], std::string[], std::string[], int);
-void impliesorder(std::string[], std::string[]);
+bool impliesorder(std::string[], std::string[], int);
 bool result(std::string[], std::string[], proposition[], int);
 int numcheck(int*);
 bool check(std::string);
@@ -177,7 +177,7 @@ bool result(std::string choices[], std::string sortedchoices[], proposition prop
   proposition prop1; //three temporary variables that hold the two propositions and the operation between them
   proposition prop2;
   std::string operation; 
-  for(int i=0; i<csize; i=1+3) {
+  for(int i=0; i<csize; i+=2) {
     if(sortedchoices[i] == "") {
       break;
     }
@@ -221,13 +221,46 @@ bool result(std::string choices[], std::string sortedchoices[], proposition prop
       temp = exclusiveor(prop1.value, prop2.value);
     }
     else if(operation == "->") {
-      temp = implies(prop1.value, prop2.value);
+	  if(impliesorder(choices, sortedchoices, csize)) {
+		temp = implies(prop2.value, prop1.value);
+	  }
+	  else{  
+        temp = implies(prop1.value, prop2.value);
+	  }
     }
     else if(operation == "<->") {
       temp = biconditional(prop1.value, prop2.value);
     }
   }  
   print(temp);
+}
+
+bool impliesorder(std::string choices[], std::string sortedchoices[], int csize) {
+  int temp1 = 0; //temporary integer to hold the index of the implication found in the first array
+  int temp2 = 0;
+  for(int i; i<csize; i++) {
+	if(choices[i] == "") {
+	  break;
+    }
+	else if(choices[i] == "->") {
+	  temp1 = i;
+	  break;
+	}
+  }
+  for(int j; j<csize; j++) {
+	if(sortedchoices[j] == "") {
+	  break;
+    }
+	else if(sortedchoices[j] == "->") {
+	  temp2 = j;
+	  break;
+	}
+	
+  }
+  if(temp2 > temp1) {
+    return true;
+  }	
+  return false;
 }
 
 int numcheck(int * amount) { //some data validation for integers
