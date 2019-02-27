@@ -26,15 +26,21 @@ std::string lowercase(std::string);
 int main() {
   int psize = 4;
   int csize = 50; //size for second list 
+  char condition = 'y'; //loop condition
   std::string name;
   proposition props[psize]; //list to hold the propositions in which the user chooses the amount
   std::string choices[csize]; //list that holds the the operations that the user chooses
   std::string sortedchoices[csize]; //sorted version of choices by order of operations
-  std::cout << "Hi, please enter your name: ";
-  std::getline(std::cin, name);
-  fill(props, name);
-  input(choices, sortedchoices, csize);
-  result(choices, sortedchoices, props, csize);
+  while(condition == 'y' || condition == 'Y') {
+    std::cout << "Hi, please enter your name: ";
+    std::getline(std::cin, name);
+    fill(props, name);
+    input(choices, sortedchoices, csize);
+    result(choices, sortedchoices, props, csize);
+    std::cout << "Would you like to try again(y for yes, anything else for no): ";
+    std::cin >> condition;
+    std::cin.ignore();
+  }
 }
 
 void print(bool value) { //used to print out the string values true and false from bool values
@@ -109,31 +115,27 @@ void sort(std::string choices[], std::string options[], std::string sortedchoice
     for(int j=0; j<size; j++) {  
       if(choices[j] == options[i]) { //if the operation is found in the choices list
         if(j == 1 && count > 0) { //if the operation is found in the start of the list, uses count to check if the sorted list is empty
-          temp[count] = choices[j];
-          count++;
-          temp[count] = choices[j-1];
-          count++;
+          sortedchoices[count] = choices[j];
+          sortedchoices[count+1] = choices[j-1];
+          count+=2;
         }
         else if(count == 0) { //if temp is empty then fill the array with the first group of operations
-          temp[count] = choices[j-1];
-          count++;
-          temp[count] = choices[j];
-          count++;
-          temp[count] = choices[j+1];
-          count++;
+          sortedchoices[count] = choices[j-1];
+          sortedchoices[count+1] = choices[j];
+          sortedchoices[count+2] = choices[j+1];
+          count+=3;
         }
         else { //if the operation is found but it is not the first operation or group of operations found
-          temp[count] = choices[j];
-          count++;
-          temp[count] = choices[j+1];
-          count++;
+          sortedchoices[count] = choices[j];
+          sortedchoices[count+1] = choices[j+1];
+          count+=2;
         }  
       }
     }
   }
-  for(int i=0; i<size; i++) {
+  /*for(int i=0; i<size; i++) {
     sortedchoices[i] = temp[i];
-  }
+  }*/
 }
 
 void fill(proposition props[], std::string name) {
@@ -146,7 +148,7 @@ void fill(proposition props[], std::string name) {
   numcheck(&size);
   std::cin.ignore();
   for(int i=0; i<size; i++) {
-    std::cout << "Please enter truth value number " << i+1 << ": ";
+    std::cout << "Please enter truth value " << propnames[i] << ": ";
     std::getline(std::cin, temp);
     props[i].value = check(temp);
     props[i].name = propnames[i]; 
@@ -188,10 +190,12 @@ bool result(std::string choices[], std::string sortedchoices[], proposition prop
         } 
         if(sortedchoices[i] == props[j].name) {
            prop1 = props[j]; 
+           break;
         } 
         else if(sortedchoices[i] == ("~" + props[j].name)) {
            prop1 = props[j];
            prop1.value = negation(prop1.value); 
+           break;
         } 
       }
     }
@@ -204,10 +208,12 @@ bool result(std::string choices[], std::string sortedchoices[], proposition prop
       }
       if(sortedchoices[i+2] == props[k].name) {
          prop2 = props[k]; 
+         break;
       } 
       else if(sortedchoices[i+2] == ("~" + props[k].name)) {
          prop2 = props[k];
          prop2.value = negation(prop2.value);  
+         break;
       } 
     }
     operation = sortedchoices[i+1];
@@ -239,7 +245,7 @@ bool impliesorder(std::string choices[], std::string sortedchoices[], int csize)
   int temp1 = 0; //temporary integer to hold the index of the implication found in the first array
   int temp2 = 0;
   for(int i; i<csize; i++) {
-	if(choices[i] == "") {
+	if(choices[i].empty()) { //uses the string function to check if string is empty (first time trying it)
 	  break;
     }
 	else if(choices[i] == "->") {
@@ -248,7 +254,7 @@ bool impliesorder(std::string choices[], std::string sortedchoices[], int csize)
 	}
   }
   for(int j; j<csize; j++) {
-	if(sortedchoices[j] == "") {
+	if(sortedchoices[j].empty()) {
 	  break;
     }
 	else if(sortedchoices[j] == "->") {
