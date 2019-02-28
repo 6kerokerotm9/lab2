@@ -20,7 +20,7 @@ int numcheck(int *);
 std::string lowercase(std::string);
 bool check(std::string temp);
 void fill(proposition[], std::string[], std::string, int, int *);
-void operate(proposition[], int, int);
+bool operate(proposition[], int, int);
 bool booleanoperation(proposition, proposition, std::string);
 
 int main() { //the main function
@@ -34,8 +34,9 @@ int main() { //the main function
     std::getline(std::cin, name);
     proposition props[psize]; //list to hold the propositions in which the user chooses the amount
     std::string choices[csize]; //list that holds the the operations that the user chooses
-    fill(props, choices, name, csize, &totalsize); 
-    operate(props, csize, totalsize);
+    fill(props, choices, name, csize, &totalsize);
+    std::cout << "For the values of the propositions that you entered, the value of the operations are: "; 
+    print(operate(props, csize, totalsize));
     std::cout << "Would you like to try again(y for yes, anything else for no): ";
     std::cin >> condition;
     std::cin.ignore();
@@ -173,17 +174,19 @@ void fill(proposition props[], std::string choices[], std::string name, int csiz
   *totalsize = counter2;
 } 
 
-void operate(proposition props[], int csize, int totalsize) {
+bool operate(proposition props[], int csize, int totalsize) {
   std::vector<proposition> temp; //temporary array used to hold the merged propositions after operation
   for(int i=0; i<totalsize; i++) {
     temp.push_back(props[i]);
   }
   proposition tempmerge; //temporary proposition created to help hold the merged propositions after operation
   std::string options [] = {"~", "^", "v", "xor", "->", "<->"}; 
+  int tempsize; //temporary integer to keep loop conditions constant
   for(int i=1; i<6; i++) { //cycles through the options list to determine order of operation
     if(temp[0].operation == "") {
       break;
     }
+    //tempsize = temp.size();
     for(int j=0; j<temp.size(); j++) {
       if(temp[j].operation == options[i]) {
           tempmerge.name = temp[j].name + temp[j+1].name;
@@ -194,7 +197,7 @@ void operate(proposition props[], int csize, int totalsize) {
       }
     }
   }  
-  std::cout << temp[0].name << temp[0].value << temp[0].operation << std::endl;
+  return temp[0].value;
 }
 
 bool booleanoperation(proposition prop1, proposition prop2, std::string operation) {
@@ -218,6 +221,8 @@ bool booleanoperation(proposition prop1, proposition prop2, std::string operatio
 }
 
 /*
+ p xor q -> p ^ r xor s
+
 
 for(int i=0; i<csize; i++) {  
     if(choices[i].empty()) {
