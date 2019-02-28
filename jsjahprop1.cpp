@@ -165,7 +165,7 @@ void fill(proposition props[], std::string choices[], std::string name, int csiz
       else if(("~" + propstemp[j].name) == (choices[i])) {
         props[counter2] = propstemp[j];
         props[counter2].value = negation(props[counter].value);
-        props[counter2].operation = choices[j+1];
+        props[counter2].operation = choices[i+1];
         counter2++;
       }
     }
