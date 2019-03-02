@@ -165,7 +165,7 @@ void fill(proposition props[], std::string choices[], std::string name, int csiz
       }
       else if(("~" + propstemp[j].name) == (choices[i])) {
         props[counter2] = propstemp[j];
-        props[counter2].value = negation(props[counter].value);
+        props[counter2].value = negation(props[counter2].value);
         props[counter2].operation = choices[i+1];
         counter2++;
       }
@@ -201,7 +201,7 @@ bool operate(proposition props[], int csize, int totalsize) {
 }
 
 bool booleanoperation(proposition prop1, proposition prop2, std::string operation) {
-  bool temp;
+  bool temp = prop1.value;
   if(operation == "^") {
     temp = conjunction(prop1.value, prop2.value);
   }
